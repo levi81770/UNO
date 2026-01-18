@@ -9,19 +9,29 @@
 </head>
 <body>
     <h1>UNO</h1>
-    <h2 id="msg">message</h2>
+    <h2 id="msg"></h2>
+    <div class="choose-color">
+        <button>red</button>
+        <button>green</button>
+        <button>yellow</button>
+        <button>blue</button>
+    </div>
     <div>
         <div>discard pile
             <div class="discard-pile"></div>
         </div>
-        <div class="deck"></div>
-        <div class="human-player">
-            player 1
+        <div class="deck">
+            <button class="draw-card">Draw Card</button>
         </div>
-        <div class="computer-player">
-            player 2
+        <div>player 1
+            <div class="human-player"></div>
         </div>
-        <button class="draw-card">Draw Card</button>
+        <div>player 2
+            <div class="computer-player"></div>
+        </div>
+        
+        <button id="challenge-wild-draw-4">challenge wild draw 4</button>
+        <button id="dont-challenge-wild-draw-4">dont challenge wild draw 4</button>
     </div>
 </body>
 </html>
