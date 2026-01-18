@@ -1,18 +1,180 @@
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    font-size: 3em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+}
+
+#msg {
+    text-align: center;
+    color: white;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    min-height: 30px;
+}
+
+.choose-color {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.choose-color button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.choose-color button:hover {
+    transform: scale(1.1);
+}
+
+.choose-color button:nth-child(1) {
+    background-color: #ff4444;
+    color: white;
+}
+
+.choose-color button:nth-child(2) {
+    background-color: #44ff44;
+    color: white;
+}
+
+.choose-color button:nth-child(3) {
+    background-color: #ffff44;
+    color: black;
+}
+
+.choose-color button:nth-child(4) {
+    background-color: #4444ff;
+    color: white;
+}
+
+.game-area {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+.discard-pile,
+.deck {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
 .card {
-    border: 1px solid black;
-    width: 80px;        
-    height: 120px;
-    display: inline-block;
+    width: 100px;
+    height: 140px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
-.green {
-    background-color: rgb(35, 248, 35);
+
+.card:hover {
+    transform: translateY(-10px);
 }
+
+/* Card colors */
 .red {
-    background-color: red;
+    background-color: #ff4444;
+    color: white;
 }
-.blue {
-    background-color: blue;
+
+.green {
+    background-color: #44ff44;
+    color: white;
 }
+
 .yellow {
-    background-color: yellow;
+    background-color: #ffff44;
+    color: black;
+}
+
+.blue {
+    background-color: #4444ff;
+    color: white;
+}
+
+.wild,
+.wild-draw-four {
+    background: linear-gradient(45deg, #ff4444, #44ff44, #ffff44, #4444ff);
+    color: white;
+    font-size: 1em;
+}
+
+.human-player,
+.computer-player {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 150px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.draw-card {
+    padding: 15px 30px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.draw-card:hover {
+    background-color: #45a049;
+}
+
+#challenge-wild-draw-4,
+#dont-challenge-wild-draw-4 {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#challenge-wild-draw-4 {
+    background-color: #ff4444;
+    color: white;
+}
+
+#dont-challenge-wild-draw-4 {
+    background-color: #4444ff;
+    color: white;
+}
+
+#challenge-wild-draw-4:hover,
+#dont-challenge-wild-draw-4:hover {
+    transform: scale(1.05);
 }
