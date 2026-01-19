@@ -1,180 +1,332 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
-    margin: 0;
-    padding: 20px;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    overflow-y: auto;
 }
 
 h1 {
-    text-align: center;
     color: white;
-    font-size: 3em;
+    font-size: 2.5em;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+}
+
+#reset-btn {
+    padding: 8px 20px;
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#reset-btn:hover {
+    background-color: #ee5a52;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
 }
 
 #msg {
-    text-align: center;
     color: white;
-    font-size: 1.2em;
-    margin-bottom: 20px;
-    min-height: 30px;
+    font-size: 1em;
+    margin-bottom: 10px;
+    height: 30px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#sub-msg {
+    color: white;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    height: 25px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .choose-color {
     display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    height: 40px;
+    min-height: 40px;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
 }
 
 .choose-color button {
-    padding: 10px 20px;
+    padding: 8px 15px;
     border: none;
     border-radius: 5px;
-    font-size: 1em;
+    font-size: 0.9em;
     cursor: pointer;
     transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .choose-color button:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .choose-color button:nth-child(1) {
-    background-color: #ff4444;
+    background-color: #e74c3c;
     color: white;
 }
 
 .choose-color button:nth-child(2) {
-    background-color: #44ff44;
+    background-color: #2ecc71;
     color: white;
 }
 
 .choose-color button:nth-child(3) {
-    background-color: #ffff44;
-    color: black;
+    background-color: #f1c40f;
+    color: #333;
 }
 
 .choose-color button:nth-child(4) {
-    background-color: #4444ff;
+    background-color: #3498db;
     color: white;
 }
 
-.game-area {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    padding: 20px;
-}
-
-.discard-pile,
-.deck {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-}
-
-.card {
-    width: 100px;
-    height: 140px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.card:hover {
-    transform: translateY(-10px);
-}
-
-/* Card colors */
-.red {
-    background-color: #ff4444;
-    color: white;
-}
-
-.green {
-    background-color: #44ff44;
-    color: white;
-}
-
-.yellow {
-    background-color: #ffff44;
-    color: black;
-}
-
-.blue {
-    background-color: #4444ff;
-    color: white;
-}
-
-.wild,
-.wild-draw-four {
-    background: linear-gradient(45deg, #ff4444, #44ff44, #ffff44, #4444ff);
-    color: white;
-    font-size: 1em;
-}
-
-.human-player,
-.computer-player {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 20px;
-    min-height: 150px;
+.challenge-buttons {
+    height: 50px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
     justify-content: center;
-}
-
-.draw-card {
-    padding: 15px 30px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.draw-card:hover {
-    background-color: #45a049;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 #challenge-wild-draw-4,
 #dont-challenge-wild-draw-4 {
     padding: 10px 20px;
-    margin: 10px;
+    margin: 5px;
     border: none;
-    border-radius: 5px;
-    font-size: 1em;
+    border-radius: 8px;
+    font-size: 0.9em;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 #challenge-wild-draw-4 {
-    background-color: #ff4444;
+    background-color: #e74c3c;
     color: white;
 }
 
 #dont-challenge-wild-draw-4 {
-    background-color: #4444ff;
+    background-color: #3498db;
     color: white;
 }
 
 #challenge-wild-draw-4:hover,
 #dont-challenge-wild-draw-4:hover {
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 8px rgba(0, 0, 0, 0.3);
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 900px;
+    align-items: center;
+}
+
+.player-section {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    width: 100%;
+}
+
+.player-section h3 {
+    color: white;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.computer-section {
+    height: 180px;
+}
+
+.computer-player {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    min-height: 120px;
+    height: 120px;
+    align-content: flex-start;
+    overflow: hidden;
+}
+
+.human-section {
+    height: 180px;
+}
+
+.human-player {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    min-height: 120px;
+    height: 120px;
+    align-content: flex-start;
+    overflow: hidden;
+}
+
+.center-area {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    width: 100%;
+}
+
+.pile-wrapper {
+    text-align: center;
+}
+
+.pile-wrapper h3 {
+    color: white;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+.discard-pile,
+.deck {
+    width: 120px;
+    height: 170px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.draw-card {
+    padding: 12px 25px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.draw-card:hover {
+    background-color: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card {
+    width: 70px;
+    height: 100px;
+    min-width: 50px;
+    min-height: 70px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    border: 3px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 1;
+}
+
+.card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.red {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.green {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.yellow {
+    background-color: #f1c40f;
+    color: #333;
+}
+
+.blue {
+    background-color: #3498db;
+    color: white;
+}
+
+.wild,
+.wild-draw-four {
+    background: linear-gradient(135deg, #e74c3c, #2ecc71, #f1c40f, #3498db);
+    color: white;
+    font-size: 0.8em;
+    text-align: center;
+    padding: 5px;
+}
+
+.computer-player img {
+    width: 70px;
+    height: 100px;
+    min-width: 50px;
+    min-height: 70px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    flex-shrink: 1;
+}
+
+/* Responsive card sizing */
+.human-player:has(.card:nth-child(10)) .card {
+    width: 60px;
+    height: 85px;
+    font-size: 1.2em;
+}
+
+.human-player:has(.card:nth-child(15)) .card {
+    width: 50px;
+    height: 70px;
+    font-size: 1em;
+}
+
+.computer-player:has(img:nth-child(10)) img {
+    width: 60px;
+    height: 85px;
+}
+
+.computer-player:has(img:nth-child(15)) img {
+    width: 50px;
+    height: 70px;
 }

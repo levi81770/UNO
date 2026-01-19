@@ -1,18 +1,28 @@
 
 
 /*-------------------------------- Constants --------------------------------*/
+
+const colors = ['red', 'green', 'yellow', 'blue']
+const actionCards = ['skip', 'draw-two', 'reverse']
+
+const TIMING = {
+    MESSAGE_DISPLAY: 1500,
+    COMPUTER_TURN_START: 800,
+    COMPUTER_THINK: 1200,
+    CARD_EFFECT: 1800,
+    QUICK_MESSAGE: 1000
+}
+
+/*---------------------------- Variables (state) ----------------------------*/
 let deck = []
 let discardPile = []
 let humanPlayer = []
 let computerPlayer = []
-const colors = ['red', 'green', 'yellow', 'blue']
-const actionCards = ['skip', 'draw-two', 'reverse']
-
-/*---------------------------- Variables (state) ----------------------------*/
 let winner
 let turn
 let chosenColor = ''
 let waitingForColorChoice = false
+let isProcessing = false
 
 /*------------------------ Cached Element References ------------------------*/
 const discardPileDiv = document.querySelector('.discard-pile')
@@ -28,7 +38,7 @@ const challengeDraw4 = document.querySelector('#challenge-wild-draw-4')
 challengeDraw4.style.display = 'none'
 const dontChallengeDraw4 = document.querySelector('#dont-challenge-wild-draw-4')
 dontChallengeDraw4.style.display = 'none'
-const resetBtn = document.querySelector('#reset')
+const resetBtn = document.querySelector('#reset-btn')
 
 
 const unoLogo = document.createElement('img')
@@ -54,22 +64,22 @@ function fillDeckWithAllCards() {
 
         const reverse1 = document.createElement('div')
         reverse1.classList.add(`${color}`, 'reverse', 'card')
-        reverse1.textContent = 'reverse'
+        reverse1.textContent = '⇄'
         deck.push(reverse1)
 
         const reverse2 = document.createElement('div')
         reverse2.classList.add(`${color}`, 'reverse', 'card')
-        reverse2.textContent = 'reverse'
+        reverse2.textContent = '⇄'
         deck.push(reverse2)
 
         const skip1 = document.createElement('div')
         skip1.classList.add(`${color}`, 'skip', 'card')
-        skip1.textContent = 'skip'
+        skip1.textContent = '⊘'
         deck.push(skip1)
 
         const skip2 = document.createElement('div')
         skip2.classList.add(`${color}`, 'skip', 'card')
-        skip2.textContent = 'skip'
+        skip2.textContent = '⊘'
         deck.push(skip2)
 
         const drawTwo1 = document.createElement('div')
@@ -90,7 +100,7 @@ function fillDeckWithAllCards() {
 
         const wildDrawFour = document.createElement('div')
         wildDrawFour.classList.add('wild-draw-four', 'card')
-        wildDrawFour.textContent = 'wild-draw-four'
+        wildDrawFour.textContent = 'wild +4'
         deck.push(wildDrawFour)
     }
 }
@@ -174,10 +184,11 @@ function isValidCard(cardToPlay, currentDiscard) {
 
     return false
 }
+
 function computerDrawCard() {
     computerPlayer.push(deck.shift())
     updateComHandDisplay()
-    msgEl.textContent = 'computer drew 1 card'
+    msgEl.textContent = 'Computer drew 1 card from the deck'
 }
 
 function drawCardsForPlayers(playerArray, playerHandDiv, count) {
@@ -196,48 +207,75 @@ function handleCardEffect(card, thrownBy) {
 
     if (card.classList.contains('draw-two')) {
         if (opponent === 'player 1') {
-            drawCardsForPlayers(humanPlayer, humanHand, 2)
-            msgEl.textContent = 'you drew 2 cards and lost your turn!'
+            msgEl.textContent = 'Draw Two played against you!'
+            subMsgEl.textContent = 'Drawing 2 cards...'
             setTimeout(() => {
-                computerTurn()
-            }, 1500)
+                drawCardsForPlayers(humanPlayer, humanHand, 2)
+                msgEl.textContent = 'You drew 2 cards and lost your turn!'
+                subMsgEl.textContent = ''
+                setTimeout(() => {
+                    computerTurn()
+                }, TIMING.CARD_EFFECT)
+            }, 500)
         } else {
-            drawCardsForPlayers(computerPlayer, computerHand, 2)
-            msgEl.textContent = 'computer drew 2 cards and lost its turn!'
+            msgEl.textContent = 'You played Draw Two!'
+            subMsgEl.textContent = 'Computer drawing 2 cards...'
+            setTimeout(() => {
+                drawCardsForPlayers(computerPlayer, computerHand, 2)
+                msgEl.textContent = 'Computer drew 2 cards and lost its turn!'
+                subMsgEl.textContent = 'Your turn again!'
+                setTimeout(() => {
+                    subMsgEl.textContent = ''
+                }, TIMING.MESSAGE_DISPLAY)
+            }, 500)
         }
         return
     }
     if (card.classList.contains('skip')) {
-        msgEl.textContent = `${opponent} was skipped!`
-        if (thrownBy === 'player 2') {
-            setTimeout(() => {
-                computerTurn()
-            }, 1500)
-        }
+        msgEl.textContent = `Skip card played!`
+        subMsgEl.textContent = `${opponent} loses their turn`
+        setTimeout(() => {
+            subMsgEl.textContent = ''
+            if (thrownBy === 'player 2') {
+                setTimeout(() => {
+                    computerTurn()
+                }, TIMING.COMPUTER_TURN_START)
+            }
+        }, TIMING.CARD_EFFECT)
         return
     }
     if (card.classList.contains('reverse')) {
-        msgEl.textContent = 'Reversed! (acts like skip in 2-player game)'
-        if (thrownBy === 'player 2') {
-            setTimeout(() => {
-                computerTurn()
-            }, 1500)
-        }
+        msgEl.textContent = 'Reverse card played!'
+        subMsgEl.textContent = `${opponent} loses their turn (reverse in 2-player)`
+        setTimeout(() => {
+            subMsgEl.textContent = ''
+            if (thrownBy === 'player 2') {
+                setTimeout(() => {
+                    computerTurn()
+                }, TIMING.COMPUTER_TURN_START)
+            }
+        }, TIMING.CARD_EFFECT)
         return
     }
     if (card.classList.contains('wild')) {
         if (thrownBy === 'player 1') {
+            msgEl.textContent = 'Wild card played!'
             chooseColorBtns.style.display = 'inline-block'
             waitingForColorChoice = true
-            subMsgEl.textContent = 'Please choose a color'
+            subMsgEl.textContent = '⬇️ Click a color below ⬇️'
             return
         } else {
             const chosenColor = colors[Math.floor(Math.random() * colors.length)]
-            discardPile.at(-1).classList.add(chosenColor)
-            subMsgEl.textContent = `Computer chose ${chosenColor}`
+            msgEl.textContent = 'Computer played Wild card'
+            subMsgEl.textContent = `Computer is choosing a color...`
             setTimeout(() => {
-                nextTurn()
-            }, 1500)
+                discardPile.at(-1).classList.add(chosenColor)
+                msgEl.textContent = `Color changed to ${chosenColor.toUpperCase()}!`
+                subMsgEl.textContent = `Computer chose ${chosenColor.toUpperCase()} - match this color`
+                setTimeout(() => {
+                    nextTurn()
+                }, TIMING.MESSAGE_DISPLAY)
+            }, TIMING.COMPUTER_THINK)
             return
         }
     }
@@ -260,27 +298,52 @@ function handleCardEffect(card, thrownBy) {
                 card.isChallengeable = 'no'
             }
             card.thrownBy = 'player 2'
-            const chosenColor = colors[Math.floor(Math.random() * colors.length)]
-            discardPile.at(-1).classList.add(chosenColor)
-            subMsgEl.textContent = `Computer chose ${chosenColor}`
+            msgEl.textContent = 'Computer played Wild Draw Four!'
+            subMsgEl.textContent = 'Computer is choosing a color...'
 
-            challengeDraw4.style.display = 'inline-block'
-            dontChallengeDraw4.style.display = 'inline-block'
+            setTimeout(() => {
+                const chosenColor = colors[Math.floor(Math.random() * colors.length)]
+                discardPile.at(-1).classList.add(chosenColor)
+                msgEl.textContent = `Color changed to ${chosenColor.toUpperCase()}!`
+                subMsgEl.textContent = `Computer chose ${chosenColor.toUpperCase()} - Do you want to challenge?`
+
+                setTimeout(() => {
+                    challengeDraw4.style.display = 'inline-block'
+                    dontChallengeDraw4.style.display = 'inline-block'
+                }, TIMING.MESSAGE_DISPLAY)
+            }, TIMING.COMPUTER_THINK)
             return
         }
     }
 }
 
-// modify
 function drawCardHandler() {
-    if (turn === 'player 2') return
-    if (waitingForColorChoice) return
+    if (turn === 'player 2') {
+        msgEl.textContent = "It's not your turn!"
+        subMsgEl.textContent = 'Wait for the computer to finish'
+        setTimeout(() => {
+            subMsgEl.textContent = ''
+        }, TIMING.QUICK_MESSAGE)
+        return
+    }
+    if (waitingForColorChoice) {
+        subMsgEl.textContent = 'Please choose a color first!'
+        return
+    }
+    if (isProcessing) return
+
+    isProcessing = true
     humanDrawCardAuto()
-    msgEl.textContent = 'You drew a card'
-    nextTurn()
+    msgEl.textContent = 'You drew 1 card from the deck'
+    subMsgEl.textContent = 'Card added to your hand'
+
+    setTimeout(() => {
+        subMsgEl.textContent = ''
+        isProcessing = false
+        nextTurn()
+    }, TIMING.MESSAGE_DISPLAY)
 }
 
-// modify
 function handleHumanCardClick(event) {
 
     if (winner) return
@@ -289,9 +352,16 @@ function handleHumanCardClick(event) {
     const clickedCardIndex = humanPlayer.indexOf(clickedCard)
 
     if (!clickedCard.classList.contains('card')) return
-    if (turn === 'player 2') return
-    if (discardPile.at(-1).processed && turn === 'player 2') return
-    if (waitingForColorChoice) return
+    if (turn === 'player 2') {
+        msgEl.textContent = "Wait! It's the computer's turn"
+        return
+    }
+    // if (discardPile.at(-1).processed && turn === 'player 2') return
+    if (waitingForColorChoice) {
+        subMsgEl.textContent = 'Choose a color first!'
+        return
+    }
+    if (isProcessing) return
 
     if (isValidCard(clickedCard, discardPile.at(-1))) {
         discardPile.push(clickedCard)
@@ -309,12 +379,18 @@ function handleHumanCardClick(event) {
         }
         updateDiscardPileDisplay()
     } else {
-        msgEl.textContent = 'not a valid card'
+        msgEl.textContent = 'Invalid card! Cannot play this card'
+        subMsgEl.textContent = 'Must match color, number, or symbol'
+        setTimeout(() => {
+            if (turn === 'player 1') {
+                msgEl.textContent = 'Your turn! Play a valid card'
+                subMsgEl.textContent = ''
+            }
+        }, TIMING.QUICK_MESSAGE)
     }
     checkForWinner()
 }
 
-// modify 
 function computerTurn() {
     checkForWinner()
     if (winner) return
@@ -347,27 +423,62 @@ function computerTurn() {
     }
 
     if (validComCards.length > 0) {
-        const randomValidCard = Math.floor(Math.random() * validComCards.length)
-        const chosenCard = validComCards[randomValidCard]
-        const chosenCardIndex = computerPlayer.indexOf(chosenCard)
-        discardPile.push(chosenCard)
-        updateDiscardPileDisplay()
-        computerPlayer.splice(chosenCardIndex, 1)
-        updateComHandDisplay()
-        handleCardEffect(chosenCard, 'player 2')
+        msgEl.textContent = 'Computer is thinking...'
+        subMsgEl.textContent = 'Analyzing cards...'
 
-        if (!chosenCard.classList.contains('wild') &&
-            !chosenCard.classList.contains('wild-draw-four') &&
-            !chosenCard.classList.contains('draw-two') &&
-            !chosenCard.classList.contains('skip') &&
-            !chosenCard.classList.contains('reverse')) {
-            nextTurn()
-        }
-        updateDiscardPileDisplay()
+        setTimeout(() => {
+            const randomValidCard = Math.floor(Math.random() * validComCards.length)
+            const chosenCard = validComCards[randomValidCard]
+            const chosenCardIndex = computerPlayer.indexOf(chosenCard)
+
+            let cardType = 'a card'
+            if (chosenCard.classList.contains('wild-draw-four')) cardType = 'Wild +4'
+            else if (chosenCard.classList.contains('wild')) cardType = 'Wild'
+            else if (chosenCard.classList.contains('draw-two')) cardType = 'Draw Two'
+            else if (chosenCard.classList.contains('skip')) cardType = 'Skip'
+            else if (chosenCard.classList.contains('reverse')) cardType = 'Reverse'
+            else {
+                for (let i = 0; i < 10; i++) {
+                    if (chosenCard.classList.contains(`${i}`)) {
+                        cardType = `${i}`
+                        break
+                    }
+                }
+            }
+
+            msgEl.textContent = `Computer played ${cardType}`
+            subMsgEl.textContent = 'Processing...'
+
+            discardPile.push(chosenCard)
+            updateDiscardPileDisplay()
+            computerPlayer.splice(chosenCardIndex, 1)
+            updateComHandDisplay()
+
+            setTimeout(() => {
+                handleCardEffect(chosenCard, 'player 2')
+
+                if (!chosenCard.classList.contains('wild') &&
+                    !chosenCard.classList.contains('wild-draw-four') &&
+                    !chosenCard.classList.contains('draw-two') &&
+                    !chosenCard.classList.contains('skip') &&
+                    !chosenCard.classList.contains('reverse')) {
+                    setTimeout(() => {
+                        nextTurn()
+                    }, 600)
+                }
+            }, 400)
+        }, TIMING.COMPUTER_THINK)
     } else {
+    msgEl.textContent = 'Computer has no valid cards'
+    subMsgEl.textContent = 'Drawing from deck...'
+    setTimeout(() => {
         computerDrawCard()
-        nextTurn()
-    }
+        subMsgEl.textContent = ''
+        setTimeout(() => {
+            nextTurn()
+        }, TIMING.MESSAGE_DISPLAY)
+    }, TIMING.COMPUTER_THINK)
+}
     checkForWinner()
     
 }
@@ -388,59 +499,115 @@ function isWildDraw4Challengeable(array1, array2, num) {
 }
 
 function nextTurn() {
-    if (winner) return;
-    turn = turn === 'player 1' ? 'player 2' : 'player 1'
-    if (turn === 'player 2') {
-        setTimeout(() => {
-            msgEl.textContent = 'Computer turn...'
-            computerTurn()
-        }, 1500)
-    } else {
-        msgEl.textContent = 'Your turn!'
+    if (winner) return
+    if (isProcessing) {
+        setTimeout(() => nextTurn(), 300)
+        return
     }
-    console.log(turn);
+
+    turn = turn === 'player 1' ? 'player 2' : 'player 1'
+
+    if (turn === 'player 2') {
+        const lastCard = discardPile.at(-1)
+        const hasColorMessage = lastCard && (lastCard.classList.contains('wild') || lastCard.classList.contains('wild-draw-four'))
+
+        if (!hasColorMessage || !subMsgEl.textContent.includes('chose')) {
+            msgEl.textContent = "Computer's turn"
+            subMsgEl.textContent = 'Please wait...'
+        }
+
+        setTimeout(() => {
+            computerTurn()
+        }, TIMING.COMPUTER_TURN_START)
+    } else {
+        const lastCard = discardPile.at(-1)
+        const hasColorMessage = lastCard && (lastCard.classList.contains('wild') || lastCard.classList.contains('wild-draw-four'))
+
+        if (!hasColorMessage || !subMsgEl.textContent.includes('chose')) {
+            msgEl.textContent = 'Your turn!'
+            subMsgEl.textContent = 'Play a card or draw from deck'
+            setTimeout(() => {
+                subMsgEl.textContent = ''
+            }, TIMING.MESSAGE_DISPLAY)
+        } else {
+            msgEl.textContent = msgEl.textContent 
+        }
+    }
 }
 
 function handleColorChoice(event) {
+    if (winner) return
     if (turn === 'player 2') return
     if (!waitingForColorChoice) return
 
     const clickedColor = event.target
-    chosenColor = clickedColor.textContent
+    chosenColor = clickedColor.textContent.toLowerCase()
 
     discardPile.at(-1).classList.add(`${chosenColor}`)
     chooseColorBtns.style.display = 'none'
     waitingForColorChoice = false
-    msgEl.textContent = `you chose ${chosenColor}`
+    msgEl.textContent = `You chose ${chosenColor.toUpperCase()}!`
+    subMsgEl.textContent = 'Color selected'
 
-    if (discardPile.at(-1).classList.contains('wild-draw-four')) {
-        discardPile.at(-1).thrownBy = 'player 1'
+    setTimeout(() => {
+        if (discardPile.at(-1).classList.contains('wild-draw-four')) {
+            discardPile.at(-1).thrownBy = 'player 1'
 
-        const oneOr2 = Math.floor(Math.random() * 2)
+            const oneOr2 = Math.floor(Math.random() * 2)
 
-        if (oneOr2 === 1) {
-            if (discardPile.at(-1).isChallengeable === 'yes') {
-                drawCardsForPlayers(humanPlayer, humanHand, 6)
-                msgEl.textContent = 'Computer challenged you successfully! You drew 6 cards and lost your turn.'
-                discardPile.at(-1).processed = true
-                nextTurn()
-                return
+            if (oneOr2 === 1) {
+                msgEl.textContent = 'Computer is challenging your Wild +4...'
+                subMsgEl.textContent = 'Checking your hand...'
+
+                setTimeout(() => {
+                    if (discardPile.at(-1).isChallengeable === 'yes') {
+                        drawCardsForPlayers(humanPlayer, humanHand, 4)
+                        msgEl.textContent = 'Challenge successful! You had a playable card'
+                        subMsgEl.textContent = 'You drew 4 cards as penalty and lost your turn'
+                        discardPile.at(-1).processed = true
+
+                        setTimeout(() => {
+                            subMsgEl.textContent = ''
+                            nextTurn()
+                        }, TIMING.CARD_EFFECT)
+                        return
+                    } else {
+                        drawCardsForPlayers(computerPlayer, computerHand, 6)
+                        msgEl.textContent = `Color changed to ${chosenColor.toUpperCase()}!`
+                        subMsgEl.textContent = `You chose ${chosenColor.toUpperCase()} - Computer drew 6 cards as penalty`
+                        discardPile.at(-1).processed = true
+
+                        setTimeout(() => {
+                            subMsgEl.textContent = ''
+                        }, TIMING.CARD_EFFECT)
+                        return
+                    }
+                }, TIMING.COMPUTER_THINK)
             } else {
-                drawCardsForPlayers(computerPlayer, computerHand, 4)
-                msgEl.textContent = 'Computer challenged you but failed! Computer drew 4 cards. Your turn again!'
-                discardPile.at(-1).processed = true
-                return 
+                msgEl.textContent = 'Computer accepted your Wild +4'
+                subMsgEl.textContent = 'Computer drawing 4 cards...'
+
+                setTimeout(() => {
+                    drawCardsForPlayers(computerPlayer, computerHand, 4)
+                    msgEl.textContent = 'Computer drew 4 cards and lost its turn'
+                    subMsgEl.textContent = 'Your turn again!'
+                    discardPile.at(-1).processed = true
+
+                    setTimeout(() => {
+                        subMsgEl.textContent = ''
+                    }, TIMING.MESSAGE_DISPLAY)
+                    return
+                }, 800)
             }
         } else {
-            drawCardsForPlayers(computerPlayer, computerHand, 4)
-            msgEl.textContent = 'Computer drew 4 cards and lost its turn. Your turn again!'
-            discardPile.at(-1).processed = true
-            return  
+            msgEl.textContent = `Color changed to ${chosenColor.toUpperCase()}!`
+            subMsgEl.textContent = `You chose ${chosenColor.toUpperCase()} - this is the new color`
+            setTimeout(() => {
+                nextTurn()
+            }, 800)
         }
-    }
-    nextTurn()
+    }, 500)
 }
-
 
 function humanDrawCardAuto() {
     humanPlayer.push(deck.shift())
@@ -448,30 +615,50 @@ function humanDrawCardAuto() {
 }
 
 function handleChallengeBtn() {
-    if (discardPile.at(-1).isChallengeable === 'yes') {
-        drawCardsForPlayers(computerPlayer, computerHand, 4)
-        msgEl.textContent = 'Challenge successful! Computer drew 4 cards. Your turn!'
-        turn = 'player 1'
-    } else {
-        drawCardsForPlayers(humanPlayer, humanHand, 6)
-        msgEl.textContent = 'Challenge failed! You drew 6 cards and lost your turn.'
-        turn = 'player 1'
-        nextTurn()
-    }
+    msgEl.textContent = 'You challenged the Wild +4!'
+    subMsgEl.textContent = 'Checking computer hand...'
     challengeDraw4.style.display = 'none'
     dontChallengeDraw4.style.display = 'none'
-    discardPile.at(-1).processed = true
+
+    setTimeout(() => {
+        if (discardPile.at(-1).isChallengeable === 'yes') {
+            drawCardsForPlayers(computerPlayer, computerHand, 4)
+            const cardColor = colors.find(c => discardPile.at(-1).classList.contains(c))
+            msgEl.textContent = `Color is ${cardColor.toUpperCase()}!`
+            subMsgEl.textContent = `Challenge successful! Computer drew 4 cards. Match ${cardColor.toUpperCase()}`
+            turn = 'player 1'
+        } else {
+            drawCardsForPlayers(humanPlayer, humanHand, 6)
+            msgEl.textContent = 'Challenge failed! Computer played legally'
+            subMsgEl.textContent = 'You drew 6 cards as penalty and lost your turn'
+            turn = 'player 1'
+            setTimeout(() => {
+                subMsgEl.textContent = ''
+                nextTurn()
+            }, TIMING.CARD_EFFECT)
+        }
+        discardPile.at(-1).processed = true
+    }, TIMING.COMPUTER_THINK)
 }
 
-function handleDontChallenge() {
-    drawCardsForPlayers(humanPlayer, humanHand, 6)
-    msgEl.textContent = 'You decided not to challenge, 4 cards was added to your hand.'
 
-    turn = 'player 1'
-    nextTurn()
+function handleDontChallenge() {
+    msgEl.textContent = 'You accepted the Wild +4'
+    subMsgEl.textContent = 'Drawing 4 cards...'
     challengeDraw4.style.display = 'none'
     dontChallengeDraw4.style.display = 'none'
-    discardPile.at(-1).processed = true
+
+    setTimeout(() => {
+        drawCardsForPlayers(humanPlayer, humanHand, 4)
+        const cardColor = colors.find(c => discardPile.at(-1).classList.contains(c))
+        msgEl.textContent = `Color is ${cardColor.toUpperCase()}!`
+        subMsgEl.textContent = `You drew 4 cards - Computer's turn. Match ${cardColor.toUpperCase()} next`
+        turn = 'player 1'
+        discardPile.at(-1).processed = true
+        setTimeout(() => {
+            nextTurn()
+        }, TIMING.MESSAGE_DISPLAY)
+    }, 500)
 }
 
 function refillDeckIfNeeded() {
@@ -499,11 +686,15 @@ function refillDeckIfNeeded() {
 function checkForWinner() {
     if (!computerPlayer.length) {
         winner = 'player 2'
-        msgEl.textContent = 'player 2 win, better luck next time'
+        msgEl.textContent = '🤖 COMPUTER WINS!'
+        subMsgEl.textContent = 'Better luck next time! Click "New Game" to try again'
+        isProcessing = true
     }
     if (!humanPlayer.length) {
         winner = 'player 1'
-        msgEl.textContent = 'player 1 win, congratulations!'
+        msgEl.textContent = '🎉 YOU WIN! CONGRATULATIONS! 🎉'
+        subMsgEl.textContent = 'Great job! Click "New Game" to play again'
+        isProcessing = true
     }
 }
 
@@ -524,11 +715,11 @@ function initGame() {
     fillDeckWithAllCards()
     shuffleDeck(deck)
     dealCardsToPlayers()
+    isProcessing = false
     startDiscardPile()
 }
 initGame()
 
-console.log(turn);
 
 /*----------------------------- Event Listeners -----------------------------*/
 
