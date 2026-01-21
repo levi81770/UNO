@@ -12,7 +12,7 @@ const TIMING = {
     CARD_EFFECT: 1800,
     QUICK_MESSAGE: 1000
 }
-//
+
 /*---------------------------- Variables (state) ----------------------------*/
 let deck = []
 let discardPile = []

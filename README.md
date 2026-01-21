@@ -1,6 +1,6 @@
 # 🎮 UNO Card Game
 
-![UNO cards](https://upload.wikimedia.org/wikipedia/en/thumb/9/97/Uno_video_game_cover.jpg/250px-Uno_video_game_cover.jpg)
+![UNO cards](https://www.rd.com/wp-content/uploads/2025/06/How-to-play-Uno_RDD_Uno_EF_061225_FT.jpg)
 
 ## Description
 
